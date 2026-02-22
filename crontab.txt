@@ -1,0 +1,17 @@
+# 全球科技新闻自动化系统 - Crontab配置
+# 每天早上8:30自动运行
+
+# 编辑crontab: crontab -e
+# 查看crontab: crontab -l
+# 删除crontab: crontab -r
+
+# 设置环境变量
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin
+HOME=/home/username
+
+# 每天8:30运行科技新闻自动化脚本
+30 8 * * * cd /mnt/okcomputer/output/tech-news-automation && ./run.sh
+
+# 可选: 同时发送通知到手机（需要配置pushover或类似服务）
+# 30 8 * * * cd /mnt/okcomputer/output/tech-news-automation && python3 main.py --send && curl -s --form-string "token=YOUR_TOKEN" --form-string "user=YOUR_USER" --form-string "message=科技早报已生成" https://api.pushover.net/1/messages.json

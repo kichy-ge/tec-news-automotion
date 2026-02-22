@@ -1,0 +1,13 @@
+[Unit]
+Description=每天8:30运行科技新闻自动化系统
+
+[Timer]
+# 每天8:30运行
+OnCalendar=*-*-* 08:30:00
+# 如果错过了时间，立即补运行
+Persistent=true
+# 随机延迟0-5分钟，避免服务器负载高峰
+RandomizedDelaySec=5m
+
+[Install]
+WantedBy=timers.target

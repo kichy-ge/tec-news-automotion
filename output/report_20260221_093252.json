@@ -1,0 +1,22 @@
+{
+  "success": true,
+  "timestamp": "2026-02-21T09:32:41.164864",
+  "steps": {
+    "fetch_news": {
+      "success": true,
+      "count": 8
+    },
+    "generate_images": {
+      "success": true,
+      "images": [
+        "/mnt/okcomputer/output/tech-news-automation/output/tech_news_cover.jpg",
+        "/mnt/okcomputer/output/tech-news-automation/output/tech_news_detail.jpg",
+        "/mnt/okcomputer/output/tech-news-automation/output/tech_news_summary.jpg"
+      ]
+    },
+    "send_to_getnote": {
+      "success": true,
+      "skipped": true
+    }
+  }
+}

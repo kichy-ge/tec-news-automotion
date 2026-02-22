@@ -1,0 +1,124 @@
+# 全球科技新闻自动化系统 - GitHub Actions工作流
+# 每天早上8:30（北京时间）自动生成科技新闻
+
+name: Daily Tech News
+
+on:
+  # 定时触发（UTC 00:30 = 北京时间 8:30）
+  schedule:
+    - cron: '30 0 * * *'
+  
+  # 手动触发
+  workflow_dispatch:
+    inputs:
+      send_to_getnote:
+        description: '发送到Get笔记'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+# 权限设置
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  generate-news:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 步骤1: 检出代码
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      # 步骤2: 设置Python环境
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      # 步骤3: 安装系统依赖
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-cjk
+          fc-cache -fv
+      
+      # 步骤4: 安装Python依赖
+      - name: Install Python dependencies
+        run: |
+          pip install -r requirements.txt
+      
+      # 步骤5: 生成新闻和图片
+      - name: Generate tech news
+        env:
+          NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
+          GNEWS_KEY: ${{ secrets.GNEWS_KEY }}
+          TIANXING_KEY: ${{ secrets.TIANXING_KEY }}
+          GETNOTE_API_KEY: ${{ secrets.GETNOTE_API_KEY }}
+        run: |
+          if [ "${{ github.event.inputs.send_to_getnote }}" = "true" ]; then
+            python3 main.py --send
+          else
+            python3 main.py --test
+          fi
+      
+      # 步骤6: 上传生成的图片
+      - name: Upload images
+        uses: actions/upload-artifact@v4
+        with:
+          name: tech-news-images-${{ github.run_id }}
+          path: |
+            output/*.jpg
+            output/*.png
+          retention-days: 30
+      
+      # 步骤7: 提交生成的文件到仓库
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # 添加生成的文件
+          git add output/
+          git add logs/ 2>/dev/null || true
+          
+          # 提交（如果有变化）
+          git commit -m "📰 Update daily tech news - $(date +'%Y-%m-%d %H:%M:%S')" || echo "No changes to commit"
+          
+          # 推送
+          git push || echo "Nothing to push"
+      
+      # 步骤8: 创建Release（可选）
+      - name: Create Release
+        if: github.event_name == 'schedule'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: daily-${{ github.run_id }}
+          name: Tech News ${{ github.run_date }}
+          body: |
+            自动生成科技新闻日报
+            生成时间: ${{ github.run_date }}
+          files: |
+            output/*.jpg
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+  # 可选：发送通知
+  notify:
+    needs: generate-news
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Send notification
+        run: |
+          echo "新闻生成完成！"
+          echo "状态: ${{ needs.generate-news.result }}"

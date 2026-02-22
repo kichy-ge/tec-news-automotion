@@ -1,0 +1,63 @@
+# 全球科技新闻自动化系统 - Docker Compose配置
+version: '3.8'
+
+services:
+  tech-news:
+    build: .
+    image: tech-news-automation:latest
+    container_name: tech-news-automation
+    
+    # 环境变量配置
+    environment:
+      # 新闻API配置（必需，至少配置一个）
+      - NEWSAPI_KEY=b1b5dc1e64064cddb26ab4d984642ba3
+      - GNEWS_KEY=626d1ce5f0c532755f3952c362034952
+      # - TIANXING_KEY=your_tianxing_key_here
+      
+      # Get笔记配置（可选）
+      # - GETNOTE_API_KEY=your_getnote_api_key
+      # - GETNOTE_WEBHOOK_URL=your_webhook_url
+      
+      # 时区设置
+      - TZ=Asia/Shanghai
+      
+      # Python设置
+      - PYTHONUNBUFFERED=1
+    
+    # 数据卷挂载
+    volumes:
+      # 输出目录（生成的图片和笔记）
+      - ./output:/app/output
+      # 日志目录
+      - ./logs:/app/logs
+      # 可选：持久化缓存
+      - ./cache:/tmp
+    
+    # 重启策略
+    restart: unless-stopped
+    
+    # 日志配置
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    # 健康检查
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import sys; sys.exit(0)"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # 可选：使用watchtower自动更新镜像
+  # watchtower:
+  #   image: containrrr/watchtower
+  #   container_name: watchtower
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   environment:
+  #     - WATCHTOWER_CLEANUP=true
+  #     - WATCHTOWER_POLL_INTERVAL=86400
+  #   restart: unless-stopped

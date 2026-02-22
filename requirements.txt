@@ -1,0 +1,16 @@
+# 全球科技新闻自动化系统 - Python依赖
+
+# 图片处理
+Pillow>=10.0.0
+
+# HTTP请求
+requests>=2.31.0
+
+# 可选: 新闻API客户端
+# newsapi-python>=0.2.6
+
+# 可选: 定时任务调度
+# schedule>=1.2.0
+
+# 可选: 环境变量管理
+# python-dotenv>=1.0.0

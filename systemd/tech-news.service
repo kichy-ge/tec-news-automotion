@@ -1,0 +1,20 @@
+[Unit]
+Description=全球科技新闻自动化系统
+After=network.target
+
+[Service]
+Type=oneshot
+User=username
+Group=username
+WorkingDirectory=/mnt/okcomputer/output/tech-news-automation
+ExecStart=/usr/bin/python3 /mnt/okcomputer/output/tech-news-automation/main.py --send
+Environment=PYTHONUNBUFFERED=1
+Environment=GETNOTE_API_KEY=your_api_key_here
+
+# 日志配置
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=tech-news
+
+[Install]
+WantedBy=multi-user.target
